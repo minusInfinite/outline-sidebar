@@ -30,7 +30,7 @@ SilverBullet will automatically sync and load the new version of the plug, just 
 If you would like to install this plug straight from Github, make sure you have the `.js` file committed to the repo and simply add
 
 ```
-- github:https://github.com/minusInfinite/outline-sidebar/outline-sidebar.plug.js
+- github:minusInfinite/outline-sidebar/outline-sidebar.plug.js
 ```
 
 to your `PLUGS` file, run `Plugs: Update` command and off you go!
