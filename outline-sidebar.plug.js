@@ -1,1 +1,372 @@
-var P=Object.defineProperty;var x=(e,r)=>{for(var n in r)P(e,n,{get:r[n],enumerable:!0})};var m=typeof window>"u"&&typeof globalThis.WebSocketPair>"u";typeof Deno>"u"&&(self.Deno={args:[],build:{arch:"x86_64"},env:{get(){}}});var l=new Map,c=0;function a(e){self.postMessage(e)}m&&(globalThis.syscall=async(e,...r)=>await new Promise((n,o)=>{c++,l.set(c,{resolve:n,reject:o}),a({type:"sys",id:c,name:e,args:r})}));function d(e,r){m&&(self.addEventListener("message",n=>{(async()=>{let o=n.data;switch(o.type){case"inv":{let i=e[o.name];if(!i)throw new Error(`Function not loaded: ${o.name}`);try{let s=await Promise.resolve(i(...o.args||[]));a({type:"invr",id:o.id,result:s})}catch(s){console.error("An exception was thrown as a result of invoking function",o.name,"error:",s.message),a({type:"invr",id:o.id,error:s.message})}}break;case"sysr":{let i=o.id,s=l.get(i);if(!s)throw Error("Invalid request id");l.delete(i),o.error?s.reject(new Error(o.error)):s.resolve(o.result)}break}})().catch(console.error)}),a({type:"manifest",manifest:r}))}function h(e){let r=atob(e),n=r.length,o=new Uint8Array(n);for(let i=0;i<n;i++)o[i]=r.charCodeAt(i);return o}function p(e){typeof e=="string"&&(e=new TextEncoder().encode(e));let r="",n=e.byteLength;for(let o=0;o<n;o++)r+=String.fromCharCode(e[o]);return btoa(r)}async function v(e,r){if(typeof e!="string"){let n=new Uint8Array(await e.arrayBuffer()),o=n.length>0?p(n):void 0;r={method:e.method,headers:Object.fromEntries(e.headers.entries()),base64Body:o},e=e.url}return syscall("sandboxFetch.fetch",e,r)}globalThis.nativeFetch=globalThis.fetch;function b(){globalThis.fetch=async function(e,r){let n=r&&r.body?p(new Uint8Array(await new Response(r.body).arrayBuffer())):void 0,o=await v(e,r&&{method:r.method,headers:r.headers,base64Body:n});return new Response(o.base64Body?h(o.base64Body):null,{status:o.status,headers:o.headers})}}m&&b();var u={};x(u,{confirm:()=>z,copyToClipboard:()=>ae,deleteLine:()=>ue,dispatch:()=>G,downloadFile:()=>q,filterBox:()=>j,flashNotification:()=>O,fold:()=>Z,foldAll:()=>re,getCurrentPage:()=>A,getCursor:()=>S,getSelection:()=>F,getText:()=>w,getUiOption:()=>J,goHistory:()=>L,hidePanel:()=>N,insertAtCursor:()=>$,insertAtPos:()=>V,moveCursor:()=>I,moveCursorToLine:()=>_,navigate:()=>U,openCommandPalette:()=>R,openPageNavigator:()=>k,openSearchPanel:()=>se,openUrl:()=>W,prompt:()=>Y,redo:()=>ie,reloadConfigAndCommands:()=>D,reloadPage:()=>E,reloadUI:()=>K,replaceRange:()=>H,save:()=>T,setSelection:()=>M,setText:()=>C,setUiOption:()=>X,showPanel:()=>Q,toggleFold:()=>te,undo:()=>ne,unfold:()=>ee,unfoldAll:()=>oe,uploadFile:()=>B,vimEx:()=>ce});typeof self>"u"&&(self={syscall:()=>{throw new Error("Not implemented here")}});function t(e,...r){return globalThis.syscall(e,...r)}function A(){return t("editor.getCurrentPage")}function w(){return t("editor.getText")}function C(e){return t("editor.setText",e)}function S(){return t("editor.getCursor")}function F(){return t("editor.getSelection")}function M(e,r){return t("editor.setSelection",e,r)}function T(){return t("editor.save")}function U(e,r=!1,n=!1){return t("editor.navigate",e,r,n)}function k(e="page"){return t("editor.openPageNavigator",e)}function R(){return t("editor.openCommandPalette")}function E(){return t("editor.reloadPage")}function K(){return t("editor.reloadUI")}function D(){return t("editor.reloadConfigAndCommands")}function W(e,r=!1){return t("editor.openUrl",e,r)}function L(e){return t("editor.goHistory",e)}function q(e,r){return t("editor.downloadFile",e,r)}function B(e,r){return t("editor.uploadFile",e,r)}function O(e,r="info"){return t("editor.flashNotification",e,r)}function j(e,r,n="",o=""){return t("editor.filterBox",e,r,n,o)}function Q(e,r,n,o=""){return t("editor.showPanel",e,r,n,o)}function N(e){return t("editor.hidePanel",e)}function V(e,r){return t("editor.insertAtPos",e,r)}function H(e,r,n){return t("editor.replaceRange",e,r,n)}function I(e,r=!1){return t("editor.moveCursor",e,r)}function _(e,r=1,n=!1){return t("editor.moveCursorToLine",e,r,n)}function $(e){return t("editor.insertAtCursor",e)}function G(e){return t("editor.dispatch",e)}function Y(e,r=""){return t("editor.prompt",e,r)}function z(e){return t("editor.confirm",e)}function J(e){return t("editor.getUiOption",e)}function X(e,r){return t("editor.setUiOption",e,r)}function Z(){return t("editor.fold")}function ee(){return t("editor.unfold")}function te(){return t("editor.toggleFold")}function re(){return t("editor.foldAll")}function oe(){return t("editor.unfoldAll")}function ne(){return t("editor.undo")}function ie(){return t("editor.redo")}function se(){return t("editor.openSearchPanel")}function ae(e){return t("editor.copyToClipboard",e)}function ue(){return t("editor.deleteLine")}function ce(e){return t("editor.vimEx",e)}async function f(){await u.flashNotification("Hello world!")}var g={helloWorld:f},y={name:"hello",functions:{helloWorld:{path:"hello.ts:helloWorld",command:{name:"Say hello"}}},assets:{}},tt={manifest:y,functionMapping:g};d(g,y);export{tt as plug};
+var __defProp = Object.defineProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+
+// https://deno.land/x/silverbullet@0.9.4/lib/plugos/worker_runtime.ts
+var runningAsWebWorker = typeof window === "undefined" && // @ts-ignore: globalThis
+typeof globalThis.WebSocketPair === "undefined";
+if (typeof Deno === "undefined") {
+  self.Deno = {
+    args: [],
+    // @ts-ignore: Deno hack
+    build: {
+      arch: "x86_64"
+    },
+    env: {
+      // @ts-ignore: Deno hack
+      get() {
+      }
+    }
+  };
+}
+var pendingRequests = /* @__PURE__ */ new Map();
+var syscallReqId = 0;
+function workerPostMessage(msg) {
+  self.postMessage(msg);
+}
+if (runningAsWebWorker) {
+  globalThis.syscall = async (name, ...args) => {
+    return await new Promise((resolve, reject) => {
+      syscallReqId++;
+      pendingRequests.set(syscallReqId, { resolve, reject });
+      workerPostMessage({
+        type: "sys",
+        id: syscallReqId,
+        name,
+        args
+      });
+    });
+  };
+}
+function setupMessageListener(functionMapping2, manifest2) {
+  if (!runningAsWebWorker) {
+    return;
+  }
+  self.addEventListener("message", (event) => {
+    (async () => {
+      const data = event.data;
+      switch (data.type) {
+        case "inv":
+          {
+            const fn = functionMapping2[data.name];
+            if (!fn) {
+              throw new Error(`Function not loaded: ${data.name}`);
+            }
+            try {
+              const result = await Promise.resolve(fn(...data.args || []));
+              workerPostMessage({
+                type: "invr",
+                id: data.id,
+                result
+              });
+            } catch (e) {
+              console.error(
+                "An exception was thrown as a result of invoking function",
+                data.name,
+                "error:",
+                e.message
+              );
+              workerPostMessage({
+                type: "invr",
+                id: data.id,
+                error: e.message
+              });
+            }
+          }
+          break;
+        case "sysr":
+          {
+            const syscallId = data.id;
+            const lookup = pendingRequests.get(syscallId);
+            if (!lookup) {
+              throw Error("Invalid request id");
+            }
+            pendingRequests.delete(syscallId);
+            if (data.error) {
+              lookup.reject(new Error(data.error));
+            } else {
+              lookup.resolve(data.result);
+            }
+          }
+          break;
+      }
+    })().catch(console.error);
+  });
+  workerPostMessage({
+    type: "manifest",
+    manifest: manifest2
+  });
+}
+function base64Decode(s) {
+  const binString = atob(s);
+  const len = binString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binString.charCodeAt(i);
+  }
+  return bytes;
+}
+function base64Encode(buffer) {
+  if (typeof buffer === "string") {
+    buffer = new TextEncoder().encode(buffer);
+  }
+  let binary = "";
+  const len = buffer.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(buffer[i]);
+  }
+  return btoa(binary);
+}
+async function sandboxFetch(reqInfo, options) {
+  if (typeof reqInfo !== "string") {
+    const body = new Uint8Array(await reqInfo.arrayBuffer());
+    const encodedBody = body.length > 0 ? base64Encode(body) : void 0;
+    options = {
+      method: reqInfo.method,
+      headers: Object.fromEntries(reqInfo.headers.entries()),
+      base64Body: encodedBody
+    };
+    reqInfo = reqInfo.url;
+  }
+  return syscall("sandboxFetch.fetch", reqInfo, options);
+}
+globalThis.nativeFetch = globalThis.fetch;
+function monkeyPatchFetch() {
+  globalThis.fetch = async function(reqInfo, init) {
+    const encodedBody = init && init.body ? base64Encode(
+      new Uint8Array(await new Response(init.body).arrayBuffer())
+    ) : void 0;
+    const r = await sandboxFetch(
+      reqInfo,
+      init && {
+        method: init.method,
+        headers: init.headers,
+        base64Body: encodedBody
+      }
+    );
+    return new Response(r.base64Body ? base64Decode(r.base64Body) : null, {
+      status: r.status,
+      headers: r.headers
+    });
+  };
+}
+if (runningAsWebWorker) {
+  monkeyPatchFetch();
+}
+
+// https://jsr.io/@silverbulletmd/silverbullet/0.9.4/plug-api/syscalls/editor.ts
+var editor_exports = {};
+__export(editor_exports, {
+  confirm: () => confirm,
+  copyToClipboard: () => copyToClipboard,
+  deleteLine: () => deleteLine,
+  dispatch: () => dispatch,
+  downloadFile: () => downloadFile,
+  filterBox: () => filterBox,
+  flashNotification: () => flashNotification,
+  fold: () => fold,
+  foldAll: () => foldAll,
+  getCurrentPage: () => getCurrentPage,
+  getCursor: () => getCursor,
+  getSelection: () => getSelection,
+  getText: () => getText,
+  getUiOption: () => getUiOption,
+  goHistory: () => goHistory,
+  hidePanel: () => hidePanel,
+  insertAtCursor: () => insertAtCursor,
+  insertAtPos: () => insertAtPos,
+  moveCursor: () => moveCursor,
+  moveCursorToLine: () => moveCursorToLine,
+  navigate: () => navigate,
+  openCommandPalette: () => openCommandPalette,
+  openPageNavigator: () => openPageNavigator,
+  openSearchPanel: () => openSearchPanel,
+  openUrl: () => openUrl,
+  prompt: () => prompt,
+  redo: () => redo,
+  reloadConfigAndCommands: () => reloadConfigAndCommands,
+  reloadPage: () => reloadPage,
+  reloadUI: () => reloadUI,
+  replaceRange: () => replaceRange,
+  save: () => save,
+  setSelection: () => setSelection,
+  setText: () => setText,
+  setUiOption: () => setUiOption,
+  showPanel: () => showPanel,
+  toggleFold: () => toggleFold,
+  undo: () => undo,
+  unfold: () => unfold,
+  unfoldAll: () => unfoldAll,
+  uploadFile: () => uploadFile,
+  vimEx: () => vimEx
+});
+
+// https://jsr.io/@silverbulletmd/silverbullet/0.9.4/plug-api/syscall.ts
+if (typeof self === "undefined") {
+  self = {
+    syscall: () => {
+      throw new Error("Not implemented here");
+    }
+  };
+}
+function syscall2(name, ...args) {
+  return globalThis.syscall(name, ...args);
+}
+
+// https://jsr.io/@silverbulletmd/silverbullet/0.9.4/plug-api/syscalls/editor.ts
+function getCurrentPage() {
+  return syscall2("editor.getCurrentPage");
+}
+function getText() {
+  return syscall2("editor.getText");
+}
+function setText(newText) {
+  return syscall2("editor.setText", newText);
+}
+function getCursor() {
+  return syscall2("editor.getCursor");
+}
+function getSelection() {
+  return syscall2("editor.getSelection");
+}
+function setSelection(from, to) {
+  return syscall2("editor.setSelection", from, to);
+}
+function save() {
+  return syscall2("editor.save");
+}
+function navigate(pageRef, replaceState = false, newWindow = false) {
+  return syscall2("editor.navigate", pageRef, replaceState, newWindow);
+}
+function openPageNavigator(mode = "page") {
+  return syscall2("editor.openPageNavigator", mode);
+}
+function openCommandPalette() {
+  return syscall2("editor.openCommandPalette");
+}
+function reloadPage() {
+  return syscall2("editor.reloadPage");
+}
+function reloadUI() {
+  return syscall2("editor.reloadUI");
+}
+function reloadConfigAndCommands() {
+  return syscall2("editor.reloadConfigAndCommands");
+}
+function openUrl(url, existingWindow = false) {
+  return syscall2("editor.openUrl", url, existingWindow);
+}
+function goHistory(delta) {
+  return syscall2("editor.goHistory", delta);
+}
+function downloadFile(filename, dataUrl) {
+  return syscall2("editor.downloadFile", filename, dataUrl);
+}
+function uploadFile(accept, capture) {
+  return syscall2("editor.uploadFile", accept, capture);
+}
+function flashNotification(message, type = "info") {
+  return syscall2("editor.flashNotification", message, type);
+}
+function filterBox(label, options, helpText = "", placeHolder = "") {
+  return syscall2("editor.filterBox", label, options, helpText, placeHolder);
+}
+function showPanel(id, mode, html, script = "") {
+  return syscall2("editor.showPanel", id, mode, html, script);
+}
+function hidePanel(id) {
+  return syscall2("editor.hidePanel", id);
+}
+function insertAtPos(text, pos) {
+  return syscall2("editor.insertAtPos", text, pos);
+}
+function replaceRange(from, to, text) {
+  return syscall2("editor.replaceRange", from, to, text);
+}
+function moveCursor(pos, center = false) {
+  return syscall2("editor.moveCursor", pos, center);
+}
+function moveCursorToLine(line, column = 1, center = false) {
+  return syscall2("editor.moveCursorToLine", line, column, center);
+}
+function insertAtCursor(text) {
+  return syscall2("editor.insertAtCursor", text);
+}
+function dispatch(change) {
+  return syscall2("editor.dispatch", change);
+}
+function prompt(message, defaultValue = "") {
+  return syscall2("editor.prompt", message, defaultValue);
+}
+function confirm(message) {
+  return syscall2("editor.confirm", message);
+}
+function getUiOption(key) {
+  return syscall2("editor.getUiOption", key);
+}
+function setUiOption(key, value) {
+  return syscall2("editor.setUiOption", key, value);
+}
+function fold() {
+  return syscall2("editor.fold");
+}
+function unfold() {
+  return syscall2("editor.unfold");
+}
+function toggleFold() {
+  return syscall2("editor.toggleFold");
+}
+function foldAll() {
+  return syscall2("editor.foldAll");
+}
+function unfoldAll() {
+  return syscall2("editor.unfoldAll");
+}
+function undo() {
+  return syscall2("editor.undo");
+}
+function redo() {
+  return syscall2("editor.redo");
+}
+function openSearchPanel() {
+  return syscall2("editor.openSearchPanel");
+}
+function copyToClipboard(data) {
+  return syscall2("editor.copyToClipboard", data);
+}
+function deleteLine() {
+  return syscall2("editor.deleteLine");
+}
+function vimEx(exCommand) {
+  return syscall2("editor.vimEx", exCommand);
+}
+
+// D:/code/Github/outline-sidebar/outline-sidebar.ts
+async function helloWorld() {
+  await editor_exports.flashNotification("Hello world!");
+}
+
+// 86575c64e9523a71.js
+var functionMapping = {
+  helloWorld
+};
+var manifest = {
+  "name": "outline-sidebar",
+  "functions": {
+    "helloWorld": {
+      "path": "outline-sidebar.ts:helloWorld",
+      "command": {
+        "name": "Say hello"
+      }
+    }
+  },
+  "assets": {}
+};
+var plug = { manifest, functionMapping };
+setupMessageListener(functionMapping, manifest);
+export {
+  plug
+};
+//# sourceMappingURL=outline-sidebar.plug.js.map

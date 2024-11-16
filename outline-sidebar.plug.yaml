@@ -1,6 +1,6 @@
-name: hello
+name: outline-sidebar
 functions:
   helloWorld:
-    path: hello.ts:helloWorld
+    path: outline-sidebar.ts:helloWorld
     command:
       name: "Say hello"
