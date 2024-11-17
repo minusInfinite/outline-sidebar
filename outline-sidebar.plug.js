@@ -4,7 +4,10 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// https://deno.land/x/silverbullet@0.9.4/lib/plugos/worker_runtime.ts
+// https://deno.land/x/silverbullet@0.10.1/lib/plugos/worker_runtime.ts
+var workerPostMessage = (_msg) => {
+  throw new Error("Not initialized yet");
+};
 var runningAsWebWorker = typeof window === "undefined" && // @ts-ignore: globalThis
 typeof globalThis.WebSocketPair === "undefined";
 if (typeof Deno === "undefined") {
@@ -23,9 +26,6 @@ if (typeof Deno === "undefined") {
 }
 var pendingRequests = /* @__PURE__ */ new Map();
 var syscallReqId = 0;
-function workerPostMessage(msg) {
-  self.postMessage(msg);
-}
 if (runningAsWebWorker) {
   globalThis.syscall = async (name, ...args) => {
     return await new Promise((resolve, reject) => {
@@ -40,10 +40,11 @@ if (runningAsWebWorker) {
     });
   };
 }
-function setupMessageListener(functionMapping2, manifest2) {
+function setupMessageListener(functionMapping2, manifest2, postMessageFn) {
   if (!runningAsWebWorker) {
     return;
   }
+  workerPostMessage = postMessageFn;
   self.addEventListener("message", (event) => {
     (async () => {
       const data = event.data;
@@ -156,7 +157,7 @@ if (runningAsWebWorker) {
   monkeyPatchFetch();
 }
 
-// https://jsr.io/@silverbulletmd/silverbullet/0.9.4/plug-api/syscalls/editor.ts
+// https://jsr.io/@silverbulletmd/silverbullet/0.10.1/plug-api/syscalls/editor.ts
 var editor_exports = {};
 __export(editor_exports, {
   confirm: () => confirm,
@@ -180,6 +181,7 @@ __export(editor_exports, {
   moveCursor: () => moveCursor,
   moveCursorToLine: () => moveCursorToLine,
   navigate: () => navigate,
+  newWindow: () => newWindow,
   openCommandPalette: () => openCommandPalette,
   openPageNavigator: () => openPageNavigator,
   openSearchPanel: () => openSearchPanel,
@@ -203,7 +205,7 @@ __export(editor_exports, {
   vimEx: () => vimEx
 });
 
-// https://jsr.io/@silverbulletmd/silverbullet/0.9.4/plug-api/syscall.ts
+// https://jsr.io/@silverbulletmd/silverbullet/0.10.1/plug-api/syscall.ts
 if (typeof self === "undefined") {
   self = {
     syscall: () => {
@@ -215,15 +217,15 @@ function syscall2(name, ...args) {
   return globalThis.syscall(name, ...args);
 }
 
-// https://jsr.io/@silverbulletmd/silverbullet/0.9.4/plug-api/syscalls/editor.ts
+// https://jsr.io/@silverbulletmd/silverbullet/0.10.1/plug-api/syscalls/editor.ts
 function getCurrentPage() {
   return syscall2("editor.getCurrentPage");
 }
 function getText() {
   return syscall2("editor.getText");
 }
-function setText(newText) {
-  return syscall2("editor.setText", newText);
+function setText(newText, isolateHistory = false) {
+  return syscall2("editor.setText", newText, isolateHistory);
 }
 function getCursor() {
   return syscall2("editor.getCursor");
@@ -237,8 +239,8 @@ function setSelection(from, to) {
 function save() {
   return syscall2("editor.save");
 }
-function navigate(pageRef, replaceState = false, newWindow = false) {
-  return syscall2("editor.navigate", pageRef, replaceState, newWindow);
+function navigate(pageRef, replaceState = false, newWindow2 = false) {
+  return syscall2("editor.navigate", pageRef, replaceState, newWindow2);
 }
 function openPageNavigator(mode = "page") {
   return syscall2("editor.openPageNavigator", mode);
@@ -257,6 +259,9 @@ function reloadConfigAndCommands() {
 }
 function openUrl(url, existingWindow = false) {
   return syscall2("editor.openUrl", url, existingWindow);
+}
+function newWindow() {
+  return syscall2("editor.newWindow");
 }
 function goHistory(delta) {
   return syscall2("editor.goHistory", delta);
@@ -343,29 +348,211 @@ function vimEx(exCommand) {
   return syscall2("editor.vimEx", exCommand);
 }
 
-// D:/code/Github/outline-sidebar/outline-sidebar.ts
-async function helloWorld() {
-  await editor_exports.flashNotification("Hello world!");
+// https://jsr.io/@silverbulletmd/silverbullet/0.10.1/plug-api/syscalls/markdown.ts
+var markdown_exports = {};
+__export(markdown_exports, {
+  parseMarkdown: () => parseMarkdown,
+  renderParseTree: () => renderParseTree
+});
+function parseMarkdown(text) {
+  return syscall2("markdown.parseMarkdown", text);
+}
+function renderParseTree(tree) {
+  return syscall2("markdown.renderParseTree", tree);
 }
 
-// 86575c64e9523a71.js
+// https://jsr.io/@silverbulletmd/silverbullet/0.10.1/plug-api/lib/tree.ts
+function collectNodesMatching(tree, matchFn) {
+  if (matchFn(tree)) {
+    return [tree];
+  }
+  let results = [];
+  if (tree.children) {
+    for (const child of tree.children) {
+      results = [...results, ...collectNodesMatching(child, matchFn)];
+    }
+  }
+  return results;
+}
+function findNodeOfType(tree, nodeType) {
+  return collectNodesMatching(tree, (n) => n.type === nodeType)[0];
+}
+function traverseTree(tree, matchFn) {
+  collectNodesMatching(tree, matchFn);
+}
+function renderToText(tree) {
+  if (!tree) {
+    return "";
+  }
+  const pieces = [];
+  if (tree.text !== void 0) {
+    return tree.text;
+  }
+  for (const child of tree.children) {
+    pieces.push(renderToText(child));
+  }
+  return pieces.join("");
+}
+
+// https://jsr.io/@silverbulletmd/silverbullet/0.10.1/plug-api/lib/markdown.ts
+function stripMarkdown(tree) {
+  if (tree.type?.endsWith("Mark") || tree.type?.endsWith("Delimiter")) {
+    return "";
+  }
+  const stripArray = (arr) => arr.map(stripMarkdown).join("");
+  switch (tree.type) {
+    case "Document":
+    case "Emphasis":
+    case "Highlight":
+    case "Strikethrough":
+    case "InlineCode":
+    case "StrongEmphasis":
+    case "Superscript":
+    case "Subscript":
+    case "Paragraph":
+    case "ATXHeading1":
+    case "ATXHeading2":
+    case "ATXHeading3":
+    case "ATXHeading4":
+    case "ATXHeading5":
+    case "ATXHeading6":
+    case "Blockquote":
+    case "BulletList":
+    case "OrderedList":
+    case "ListItem":
+    case "Table":
+    case "TableHeader":
+    case "TableCell":
+    case "TableRow":
+    case "Task":
+    case "HTMLTag": {
+      return stripArray(tree.children);
+    }
+    case "FencedCode":
+    case "CodeBlock": {
+      tree.children = tree.children.filter((c) => c.type);
+      return stripArray(tree.children);
+    }
+    case "Link": {
+      const linkTextChildren = tree.children.slice(1, -4);
+      return stripArray(linkTextChildren);
+    }
+    case "Image": {
+      const altTextNode = findNodeOfType(tree, "WikiLinkAlias") || tree.children[1];
+      let altText = altTextNode && altTextNode.type !== "LinkMark" ? renderToText(altTextNode) : "<Image>";
+      const dimReg = /\d*[^\|\s]*?[xX]\d*[^\|\s]*/.exec(altText);
+      if (dimReg) {
+        altText = altText.replace(dimReg[0], "").replace("|", "");
+      }
+      return altText;
+    }
+    case "WikiLink": {
+      const aliasNode = findNodeOfType(tree, "WikiLinkAlias");
+      let linkText;
+      if (aliasNode) {
+        linkText = aliasNode.children[0].text;
+      } else {
+        const ref = findNodeOfType(tree, "WikiLinkPage").children[0].text;
+        linkText = ref.split("/").pop();
+      }
+      return linkText;
+    }
+    case "NakedURL": {
+      const url = tree.children[0].text;
+      return url;
+    }
+    case "CommandLink": {
+      const aliasNode = findNodeOfType(tree, "CommandLinkAlias");
+      let command;
+      if (aliasNode) {
+        command = aliasNode.children[0].text;
+      } else {
+        command = tree.children[1].children[0].text;
+      }
+      return command;
+    }
+    case "TaskState": {
+      return tree.children[1].text;
+    }
+    case "Escape": {
+      return tree.children[0].text.slice(1);
+    }
+    case "CodeText":
+    case "Entity": {
+      return tree.children[0].text;
+    }
+    case "TemplateDirective":
+    case "DeadlineDate": {
+      return renderToText(tree);
+    }
+    case "CodeInfo":
+    case "CommentBlock":
+    case "FrontMatter":
+    case "Hashtag":
+    case "HardBreak":
+    case "HorizontalRule":
+    case "NamedAnchor":
+    case "Attribute": {
+      return "";
+    }
+    case void 0:
+      return tree.text;
+    default:
+      console.log("Unknown tree type: ", tree.type);
+      return "";
+  }
+}
+
+// D:/code/Github/outline-sidebar/outline-sidebar.ts
+async function outlineSidebar() {
+  let config = {};
+  const page = await editor_exports.getCurrentPage();
+  const text = await editor_exports.getText();
+  const tree = await markdown_exports.parseMarkdown(text);
+  const headers = [];
+  traverseTree(tree, (n) => {
+    if (n.type?.startsWith("ATXHeading")) {
+      headers.push({
+        name: n.children.slice(1).map(stripMarkdown).join("").trim(),
+        pos: n.from,
+        level: +n.type[n.type.length - 1]
+      });
+      return true;
+    }
+    return false;
+  });
+  if (headers.length === 0) {
+    return null;
+  }
+  const minLevel = headers.reduce(
+    (min, header) => Math.min(min, header.level),
+    6
+  );
+  const renderedMd = headers.map(
+    (header) => `${" ".repeat((header.level - minLevel) * 2)}* [[${page}@${header.pos}|${header.name}]]`
+  ).join("\n");
+  console.log(renderedMd);
+  return {};
+}
+
+// a90c45697e8e13d.js
 var functionMapping = {
-  helloWorld
+  outlineSidebar
 };
 var manifest = {
   "name": "outline-sidebar",
   "functions": {
-    "helloWorld": {
-      "path": "outline-sidebar.ts:helloWorld",
+    "outlineSidebar": {
+      "path": "./outline-sidebar.ts:outlineSidebar",
       "command": {
-        "name": "Say hello"
+        "name": "Run Outline Sidebar"
       }
     }
   },
   "assets": {}
 };
 var plug = { manifest, functionMapping };
-setupMessageListener(functionMapping, manifest);
+setupMessageListener(functionMapping, manifest, self.postMessage);
 export {
   plug
 };

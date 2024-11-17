@@ -1,6 +1,6 @@
 name: outline-sidebar
 functions:
-  helloWorld:
-    path: outline-sidebar.ts:helloWorld
+  outlineSidebar:
+    path: "./outline-sidebar.ts:outlineSidebar"
     command:
-      name: "Say hello"
+      name: "Run Outline Sidebar"
