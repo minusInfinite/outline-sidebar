@@ -361,6 +361,76 @@ function renderParseTree(tree) {
   return syscall2("markdown.renderParseTree", tree);
 }
 
+// https://jsr.io/@silverbulletmd/silverbullet/0.10.1/plug-api/syscalls/system.ts
+var system_exports = {};
+__export(system_exports, {
+  applyAttributeExtractors: () => applyAttributeExtractors,
+  getEnv: () => getEnv,
+  getMode: () => getMode,
+  getSpaceConfig: () => getSpaceConfig,
+  getVersion: () => getVersion,
+  invokeCommand: () => invokeCommand,
+  invokeFunction: () => invokeFunction,
+  invokeSpaceFunction: () => invokeSpaceFunction,
+  listCommands: () => listCommands,
+  listSyscalls: () => listSyscalls,
+  reloadConfig: () => reloadConfig,
+  reloadPlugs: () => reloadPlugs
+});
+function invokeFunction(name, ...args) {
+  return syscall2("system.invokeFunction", name, ...args);
+}
+function invokeCommand(name, args) {
+  return syscall2("system.invokeCommand", name, args);
+}
+function listCommands() {
+  return syscall2("system.listCommands");
+}
+function listSyscalls() {
+  return syscall2("system.listSyscalls");
+}
+function invokeSpaceFunction(name, ...args) {
+  return syscall2("system.invokeSpaceFunction", name, ...args);
+}
+function applyAttributeExtractors(tags, text, tree) {
+  return syscall2("system.applyAttributeExtractors", tags, text, tree);
+}
+async function getSpaceConfig(key, defaultValue) {
+  return await syscall2("system.getSpaceConfig", key) ?? defaultValue;
+}
+function reloadPlugs() {
+  return syscall2("system.reloadPlugs");
+}
+function reloadConfig() {
+  return syscall2("system.reloadConfig");
+}
+function getEnv() {
+  return syscall2("system.getEnv");
+}
+function getMode() {
+  return syscall2("system.getMode");
+}
+function getVersion() {
+  return syscall2("system.getVersion");
+}
+
+// https://jsr.io/@silverbulletmd/silverbullet/0.10.1/plug-api/syscalls/clientStore.ts
+var clientStore_exports = {};
+__export(clientStore_exports, {
+  del: () => del,
+  get: () => get,
+  set: () => set
+});
+function set(key, value) {
+  return syscall2("clientStore.set", key, value);
+}
+function get(key) {
+  return syscall2("clientStore.get", key);
+}
+function del(key) {
+  return syscall2("clientStore.delete", key);
+}
+
 // https://jsr.io/@silverbulletmd/silverbullet/0.10.1/plug-api/lib/tree.ts
 function collectNodesMatching(tree, matchFn) {
   if (matchFn(tree)) {
@@ -504,7 +574,40 @@ function stripMarkdown(tree) {
 }
 
 // D:/code/Github/outline-sidebar/outline-sidebar.ts
-async function outlineSidebar() {
+var PLUG_NAME = "Outline Sidebar";
+var OSB_STATE_KEY = "enableOutlineSidebar";
+async function isOSBEnabled() {
+  return !!await clientStore_exports.get(OSB_STATE_KEY);
+}
+async function setOSBEnabled(value) {
+  return await clientStore_exports.set(OSB_STATE_KEY, value);
+}
+async function hideOutlineSidebar() {
+  await editor_exports.hidePanel("rhs");
+  await setOSBEnabled(false);
+}
+async function toggleOutlineSidebar() {
+  const currentState = await isOSBEnabled();
+  if (!currentState) {
+    await showOutlineSidebar();
+  } else {
+    await hideOutlineSidebar();
+  }
+}
+async function showOSBIfEnabled() {
+  try {
+    const env = await system_exports.getEnv();
+    if (env === "server") {
+      return;
+    }
+    if (await isOSBEnabled()) {
+      return await showOutlineSidebar();
+    }
+  } catch (e) {
+    console.error(`${PLUG_NAME}: showOSBIfEnabled failed`, e);
+  }
+}
+async function showOutlineSidebar() {
   let config = {};
   const page = await editor_exports.getCurrentPage();
   const text = await editor_exports.getText();
@@ -528,24 +631,73 @@ async function outlineSidebar() {
     (min, header) => Math.min(min, header.level),
     6
   );
-  const renderedMd = headers.map(
-    (header) => `${" ".repeat((header.level - minLevel) * 2)}* [[${page}@${header.pos}|${header.name}]]`
-  ).join("\n");
-  console.log(renderedMd);
-  return {};
+  let finalHtml = "";
+  let lastLevel = 0;
+  headers.map((header, index, arr) => {
+    let level = header.level;
+    console.log(level);
+    if (index === 0) {
+      finalHtml += `<ul>`;
+    } else if (level > lastLevel) {
+      for (let i = 0; i < level - lastLevel; ++i) {
+        finalHtml += `<ul>`;
+      }
+    } else if (level < lastLevel) {
+      for (let i = 0; i < lastLevel - level; ++i) {
+        finalHtml += `</ul>`;
+      }
+    }
+    finalHtml += `
+    <li><span class="p"><a href="${page}@${header.pos}" class="wiki-link" data-ref="${page}@${header.pos}">${header.name}</a></span><li>`;
+    if (index === arr.length - 1) {
+      finalHtml += `</ul>`;
+    }
+    lastLevel = level;
+  });
+  console.log(finalHtml);
+  await editor_exports.showPanel(
+    "rhs",
+    0.5,
+    `
+        <div id="Outline-Sidebar">
+            ${finalHtml}
+        </div>
+        `,
+    ""
+  );
+  await setOSBEnabled(true);
 }
 
-// a90c45697e8e13d.js
+// 69a5c8d3b9f989b9.js
 var functionMapping = {
-  outlineSidebar
+  showOutlineSidebar,
+  hideOutlineSidebar,
+  showOSBIfEnabled,
+  toggle: toggleOutlineSidebar
 };
 var manifest = {
   "name": "outline-sidebar",
   "functions": {
-    "outlineSidebar": {
-      "path": "./outline-sidebar.ts:outlineSidebar",
+    "showOutlineSidebar": {
+      "path": "./outline-sidebar.ts:showOutlineSidebar"
+    },
+    "hideOutlineSidebar": {
+      "path": "./outline-sidebar.ts:hideOutlineSidebar"
+    },
+    "showOSBIfEnabled": {
+      "path": "./outline-sidebar.ts:showOSBIfEnabled",
+      "evnets": [
+        "editor:init",
+        "editor:pageLoaded",
+        "editor:pageSaved"
+      ]
+    },
+    "toggle": {
+      "path": "./outline-sidebar.ts:toggleOutlineSidebar",
       "command": {
-        "name": "Run Outline Sidebar"
+        "name": "Outline Sidebar: Toggle",
+        "key": "Ctrl-alt-o",
+        "mac": "Cmd-alt-o"
       }
     }
   },

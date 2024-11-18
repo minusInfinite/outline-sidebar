@@ -1,6 +1,21 @@
 name: outline-sidebar
 functions:
-  outlineSidebar:
-    path: "./outline-sidebar.ts:outlineSidebar"
+  showOutlineSidebar:
+    path: "./outline-sidebar.ts:showOutlineSidebar"
+
+  hideOutlineSidebar:
+    path: "./outline-sidebar.ts:hideOutlineSidebar"
+
+  showOSBIfEnabled:
+    path: "./outline-sidebar.ts:showOSBIfEnabled"
+    evnets:
+      - editor:init
+      - editor:pageLoaded
+      - editor:pageSaved
+
+  toggle:
+    path: "./outline-sidebar.ts:toggleOutlineSidebar"
     command:
-      name: "Run Outline Sidebar"
+      name: "Outline Sidebar: Toggle"
+      key: Ctrl-alt-o
+      mac: Cmd-alt-o
