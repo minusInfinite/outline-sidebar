@@ -3,7 +3,6 @@ import {
     editor,
     markdown,
     system,
-    YAML,
 } from "@silverbulletmd/silverbullet/syscalls";
 import { stripMarkdown } from "@silverbulletmd/silverbullet/lib/markdown";
 import { traverseTree } from "@silverbulletmd/silverbullet/lib/tree";
@@ -84,11 +83,6 @@ export async function showOutlineSidebar(): Promise<any | null> {
     if (headers.length === 0) {
         return null;
     }
-
-    const minLevel = headers.reduce(
-        (min, header) => Math.min(min, header.level),
-        6,
-    );
 
     let finalHtml = "";
     let lastLevel = 0;
