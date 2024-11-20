@@ -18,7 +18,7 @@ type OutlineSBConfig = {
     header?: boolean;
 };
 
-const PLUG_NAME = "Outline Sidebar";
+const PLUG_NAME = "outline-sidebar";
 
 const OSB_STATE_KEY = "enableOutlineSidebar";
 
