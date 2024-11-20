@@ -1,4 +1,5 @@
 import {
+    asset,
     clientStore,
     editor,
     markdown,
@@ -61,6 +62,10 @@ export async function showOSBIfEnabled() {
 export async function showOutlineSidebar(): Promise<any | null> {
     let config: OutlineSBConfig = {};
 
+    const [plugJs] = await Promise.all([
+        asset.readAsset(PLUG_NAME, "assets/outline-sidebar.js"),
+    ]);
+
     const page = await editor.getCurrentPage();
     const text = await editor.getText();
     const tree = await markdown.parseMarkdown(text);
@@ -89,7 +94,6 @@ export async function showOutlineSidebar(): Promise<any | null> {
 
     headers.map((header, index, arr) => {
         let level = header.level;
-        console.log(level);
 
         if (index === 0) {
             finalHtml += `<ul>`;
@@ -103,7 +107,7 @@ export async function showOutlineSidebar(): Promise<any | null> {
             }
         }
         finalHtml += `
-    <li><span class="p"><a href="${page}@${header.pos}" class="wiki-link" data-ref="${page}@${header.pos}">${header.name}</a></span><li>`;
+            <li><span class="p wiki-link osb-clickable" data-osbpos="${header.pos}">${header.name}</span><li>`;
 
         if (index === arr.length - 1) {
             finalHtml += `</ul>`;
@@ -111,18 +115,19 @@ export async function showOutlineSidebar(): Promise<any | null> {
 
         lastLevel = level;
     });
-    // console.log("Markdown", renderedMd)
 
-    console.log(finalHtml);
     await editor.showPanel(
         "rhs",
         0.5,
         `
-        <div id="Outline-Sidebar">
+        <link rel="stylesheet" href="/.client/main.css" />
+        <div id="outline-sidebar-root">
             ${finalHtml}
         </div>
         `,
-        "",
+        `
+        ${plugJs}
+        `,
     );
 
     await setOSBEnabled(true);

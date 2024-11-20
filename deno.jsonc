@@ -21,5 +21,13 @@
   },
   "imports": {
     "@silverbulletmd/silverbullet": "jsr:@silverbulletmd/silverbullet@^0.10.0"
+  },
+  "compilerOptions": {
+    "checkJs": false,
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ]
   }
 }
