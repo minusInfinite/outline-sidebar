@@ -60,14 +60,13 @@ export async function showOSBIfEnabled() {
 }
 
 export async function showOutlineSidebar(): Promise<any | null> {
-    let config: OutlineSBConfig = {};
+    //let config: OutlineSBConfig = {};
 
     const [plusCss, plugJs] = await Promise.all([
         asset.readAsset(PLUG_NAME, "assets/outline-sidebar.css"),
         asset.readAsset(PLUG_NAME, "assets/outline-sidebar.js"),
     ]);
 
-    const page = await editor.getCurrentPage();
     const text = await editor.getText();
     const tree = await markdown.parseMarkdown(text);
     const headers: Header[] = [];

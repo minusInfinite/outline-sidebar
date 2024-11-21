@@ -7,7 +7,7 @@
 }
 
 #outline-sidebar-root li::before {
-    content: "\27A2";
+    content: "\2B9E";
     color: var(--editor-list-bullet-color);
     display: inline-block;
     width: 1em;
