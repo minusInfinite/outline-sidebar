@@ -1,5 +1,6 @@
 #outline-sidebar-root {
     font-family: var(--editor-font);
+    font-size: 0.8rem;
 }
 
 #outline-sidebar-root ul {

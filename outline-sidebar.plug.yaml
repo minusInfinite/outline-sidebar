@@ -10,10 +10,13 @@ functions:
 
   showOSBIfEnabled:
     path: "./outline-sidebar.ts:showOSBIfEnabled"
-    evnets:
+    events:
       - editor:init
+      - editor:lint
       - editor:pageLoaded
       - editor:pageSaved
+      - sync:success
+      - file:changed
 
   toggle:
     path: "./outline-sidebar.ts:toggleOutlineSidebar"
