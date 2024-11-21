@@ -61,6 +61,7 @@ export async function showOSBIfEnabled() {
 
 export async function showOutlineSidebar(): Promise<any | null> {
     //let config: OutlineSBConfig = {};
+    await editor.hidePanel("rhs");
 
     const [plusCss, plugJs] = await Promise.all([
         asset.readAsset(PLUG_NAME, "assets/outline-sidebar.css"),

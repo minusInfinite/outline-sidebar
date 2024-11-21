@@ -29,5 +29,8 @@
       "dom",
       "dom.iterable"
     ]
-  }
+  },
+  "exclude": [
+    "*.plug.js"
+  ]
 }
