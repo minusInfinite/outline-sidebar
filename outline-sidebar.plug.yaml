@@ -13,10 +13,9 @@ functions:
     events:
       - editor:init
       - editor:lint
+      - editor:updated
       - editor:pageLoaded
-      - editor:pageSaved
-      - sync:success
-      - file:changed
+      - editor:pageReloaded
 
   toggle:
     path: "./outline-sidebar.ts:toggleOutlineSidebar"

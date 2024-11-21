@@ -16,6 +16,19 @@ If you would like to install this plug straight from Github, make sure you have 
 
 to your `PLUGS` file, run `Plugs: Update` command and off you go!
 
+### Smooth scrolling
+
+Add the following space-style to enable smooth scrolling and a smaller scrollbar
+
+```css
+div.cm-scroller {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+```
+
+Adding this will now scroll smoothly when clicked.
+
 ## Commands
 
 `Outline Sidebar: Tooggle` Toggle the sidebar open or close or with `Ctrl+Alt+o` or `Cmd+alt+o` on Mac
