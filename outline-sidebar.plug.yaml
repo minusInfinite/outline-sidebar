@@ -12,7 +12,6 @@ functions:
     path: "./outline-sidebar.ts:showOSBIfEnabled"
     events:
       - editor:init
-      - editor:lint
       - editor:updated
       - editor:pageLoaded
       - editor:pageReloaded
