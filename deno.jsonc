@@ -1,0 +1,33 @@
+{
+  "tasks": {
+    "build": "silverbullet plug:compile -c deno.jsonc outline-sidebar.plug.yaml",
+    "watch": "silverbullet plug:compile -c deno.jsonc outline-sidebar.plug.yaml -w",
+    "debug": "silverbullet plug:compile -c deno.jsonc outline-sidebar.plug.yaml --debug",
+    "test": "deno test -A --unstable-kv --unstable-worker-options"
+  },
+  "lint": {
+    "rules": {
+      "exclude": [
+        "no-explicit-any"
+      ]
+    }
+  },
+  "fmt": {
+    "exclude": [
+      "*.md",
+      "**/*.md",
+      "*.plug.js"
+    ]
+  },
+  "imports": {
+    "@silverbulletmd/silverbullet": "jsr:@silverbulletmd/silverbullet@^0.10.0"
+  },
+  "compilerOptions": {
+    "checkJs": false,
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ]
+  }
+}

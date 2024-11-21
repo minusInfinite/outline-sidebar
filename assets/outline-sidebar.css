@@ -1,0 +1,27 @@
+#outline-sidebar-root {
+    font-family: var(--editor-font);
+}
+
+#outline-sidebar-root ul {
+    list-style: none;
+}
+
+#outline-sidebar-root li::before {
+    content: "\27A2";
+    color: var(--editor-list-bullet-color);
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
+
+#outline-sidebar-root span.osb-clickable:hover {
+    cursor: pointer;
+}
+
+#outline-sidebar-root span.osb-clickable {
+    border-radius: 5px;
+    padding: 0 5px;
+    color: var(--editor-wiki-link-page-color);
+    background-color: var(--editor-wiki-link-page-background-color);
+    text-decoration: none;
+}
