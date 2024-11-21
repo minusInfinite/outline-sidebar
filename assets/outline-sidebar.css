@@ -1,10 +1,11 @@
 #outline-sidebar-root {
     font-family: var(--editor-font);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
 }
 
 #outline-sidebar-root ul {
     list-style: none;
+    padding-inline-start: 16px;
 }
 
 #outline-sidebar-root li::before {
