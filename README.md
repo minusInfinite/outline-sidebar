@@ -35,9 +35,9 @@ Adding this will now scroll smoothly when clicked.
 
 ## To-do and known issues
 
-- [ ] Sidebar does remain open between page reloads but doesn't refresh the heading list when edited, saved or page change.
-
 - [ ] Colapsing the outline would a nice feature
+
+- [x] Sidebar does remain open between page reloads but doesn't refresh the heading list when edited, saved or page change.
 
 ## Contributions
 
