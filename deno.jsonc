@@ -20,7 +20,7 @@
     ]
   },
   "imports": {
-    "@silverbulletmd/silverbullet": "jsr:@silverbulletmd/silverbullet@^0.10.0"
+    "@silverbulletmd/silverbullet": "jsr:@silverbulletmd/silverbullet@^0.10.4"
   },
   "compilerOptions": {
     "checkJs": false,

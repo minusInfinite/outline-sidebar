@@ -46,9 +46,13 @@ export async function toggleOutlineSidebar() {
 
 export async function showOSBIfEnabled() {
     try {
-        const env = await system.getEnv();
-        if (env === "server") {
-            return;
+        const version = await system.getVersion();
+
+        if (version.includes("0.10")) {
+            const env = await system.getEnv();
+            if (env === "server") {
+                return;
+            }
         }
 
         if (await isOSBEnabled()) {
